@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "SM_LLMClient": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "applicationUrl": "https://localhost:7011;http://localhost:7010",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

@@ -1,0 +1,116 @@
+@page "/Chat"
+@using System.Net.Http.Json
+@using Microsoft.JSInterop
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<div class="chat-container">
+    <div class="chat-header">
+        <h3>LLM Chat</h3>
+    </div>
+    
+    <div class="chat-messages" id="chatMessages">
+        @foreach (var message in Messages)
+        {
+            @if (message.StartsWith("You:"))
+            {
+                <div class="message-container user-container">
+                    <div class="message user-message">
+                        <div class="message-content">
+                            @message.Substring(4)
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (message.StartsWith("Bot:"))
+            {
+                <div class="message-container bot-container">
+                    <div class="message bot-message">
+                        <div class="message-content">
+                            @message.Substring(4)
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="message-container system-container">
+                    <div class="message system-message">
+                        <div class="message-content">
+                            @message
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+    
+    <div class="chat-input-container">
+        <div class="input-wrapper">
+            <input 
+                @bind="UserInput" 
+                @bind:event="oninput" 
+                @onkeydown="HandleKeyDown" 
+                placeholder="Ask me something..." 
+                class="chat-input" 
+            />
+            <button class="send-button" @onclick="Send" disabled="@(string.IsNullOrWhiteSpace(UserInput))">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string UserInput { get; set; } = string.Empty;
+    private List<string> Messages = new();
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(UserInput))
+        {
+            await Send();
+        }
+    }
+
+    private async Task Send()
+    {
+        if (string.IsNullOrWhiteSpace(UserInput)) return;
+        var request = new { prompt = UserInput, conversationId = Guid.NewGuid() };
+        @* var response = await Http.PostAsJsonAsync("api/chat", request); *@
+        // filepath: SM_LLMClient/Pages/Chat.razor
+        var response = await Http.PostAsJsonAsync("api/Chat", request);
+        var data = await response.Content.ReadFromJsonAsync<ChatResponse>();
+        Messages.Add($"You: {UserInput}");
+        Messages.Add($"Bot: {data?.message}");
+        UserInput = string.Empty;
+        
+        // Scroll to bottom after sending message
+        await Task.Delay(100); // Small delay to ensure DOM is updated
+        await JS.InvokeVoidAsync("scrollToBottom");
+    }
+
+    public class ChatResponse
+    {
+        public string message { get; set; } = string.Empty;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Call GET /api/chat when the page first loads
+        try
+        {
+            var data = await Http.GetFromJsonAsync<ChatResponse>("api/Chat");
+            if (data != null && !string.IsNullOrEmpty(data.message))
+            {
+                Messages.Add($"Bot: {data.message}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Messages.Add($"Error: {ex.Message}");
+        }
+    }
+}
