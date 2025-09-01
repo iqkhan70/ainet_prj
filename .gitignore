@@ -35,4 +35,4 @@ packages/
 
 # macOS junk
 .DS_Store
-appsettings.json
+SM_LLMServer/appsettings.json
