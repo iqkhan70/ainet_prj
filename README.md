@@ -6,7 +6,7 @@ A full-stack Blazor WebAssembly application with multiple AI providers integrati
 
 ### Configuration
 
-1. Copy `SM_LLMServer/appsettings.template.json` to `SM_LLMServer/appsettings.json`
+1. Copy `SM_LLMServer/appsettings.example.json` to `SM_LLMServer/appsettings.json`
 2. Fill in your API keys:
    - **OpenAI**: Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys)
    - **Hugging Face**: Get your token from [Hugging Face Settings](https://huggingface.co/settings/tokens)
@@ -44,4 +44,4 @@ A full-stack Blazor WebAssembly application with multiple AI providers integrati
 
 ## Security Note
 
-The `appsettings.json` file is gitignored to prevent accidentally committing API keys. Always use the template file and keep your actual configuration local.
+The `appsettings.json` file is gitignored to prevent accidentally committing API keys. Always use the example file and keep your actual configuration local.
