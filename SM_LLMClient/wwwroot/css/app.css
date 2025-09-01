@@ -112,7 +112,7 @@ html, body {
     height: 12px;
     background-color: #374151;
     border-radius: 50%;
-    animation: pulse 1.5s ease-in-out infinite;
+    animation: dotAppear 1.5s ease-in-out infinite;
 }
 
 .dot:nth-child(2) {
@@ -123,13 +123,32 @@ html, body {
     animation-delay: 1s;
 }
 
-@keyframes pulse {
-    0%, 100% {
-        opacity: 0.4;
+@keyframes dotAppear {
+    0%, 20% {
+        opacity: 0.3;
+        transform: scale(0.8);
     }
     50% {
         opacity: 1;
+        transform: scale(1.2);
     }
+    80%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Individual dot delays for sequential animation */
+.dot1 {
+    animation-delay: 0s;
+}
+
+.dot2 {
+    animation-delay: 0.5s;
+}
+
+.dot3 {
+    animation-delay: 1s;
 }
 
 /* Spinner for send button */
