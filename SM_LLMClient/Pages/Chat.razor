@@ -8,7 +8,6 @@
     <div class="chat-header">
         <h3>LLM Chat</h3>
     </div>
-    
     <div class="chat-messages" id="chatMessages">
         @foreach (var message in Messages)
         {
@@ -43,8 +42,22 @@
                 </div>
             }
         }
+        
+        @if (IsLoading)
+        {
+            <div class="message-container bot-container">
+                <div class="message bot-message">
+                    <div class="message-content">
+                        <div style="display: flex; flex-direction: row; gap: 6px;">
+                            <div style="background-color: #374151; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></div>
+                            <div style="background-color: #374151; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></div>
+                            <div style="background-color: #374151; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
-    
     <div class="chat-input-container">
         <div class="input-wrapper">
             <input 
@@ -53,11 +66,19 @@
                 @onkeydown="HandleKeyDown" 
                 placeholder="Ask me something..." 
                 class="chat-input" 
+                disabled="@IsLoading"
             />
-            <button class="send-button" @onclick="Send" disabled="@(string.IsNullOrWhiteSpace(UserInput))">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor"/>
-                </svg>
+            <button class="send-button" @onclick="Send" disabled="@(string.IsNullOrWhiteSpace(UserInput) || IsLoading)">
+                @if (IsLoading)
+                {
+                    <div class="spinner"></div>
+                }
+                else
+                {
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor"/>
+                    </svg>
+                }
             </button>
         </div>
     </div>
@@ -66,10 +87,11 @@
 @code {
     private string UserInput { get; set; } = string.Empty;
     private List<string> Messages = new();
+    private bool IsLoading = false;
 
     private async Task HandleKeyDown(KeyboardEventArgs e)
     {
-        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(UserInput))
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(UserInput) && !IsLoading)
         {
             await Send();
         }
@@ -77,19 +99,52 @@
 
     private async Task Send()
     {
-        if (string.IsNullOrWhiteSpace(UserInput)) return;
-        var request = new { prompt = UserInput, conversationId = Guid.NewGuid() };
-        @* var response = await Http.PostAsJsonAsync("api/chat", request); *@
-        // filepath: SM_LLMClient/Pages/Chat.razor
-        var response = await Http.PostAsJsonAsync("api/Chat", request);
-        var data = await response.Content.ReadFromJsonAsync<ChatResponse>();
-        Messages.Add($"You: {UserInput}");
-        Messages.Add($"Bot: {data?.message}");
-        UserInput = string.Empty;
+        if (string.IsNullOrWhiteSpace(UserInput) || IsLoading) return;
         
-        // Scroll to bottom after sending message
-        await Task.Delay(100); // Small delay to ensure DOM is updated
-        await JS.InvokeVoidAsync("scrollToBottom");
+        try
+        {
+            IsLoading = true;
+            StateHasChanged();
+            
+            // Play send sound
+            await JS.InvokeVoidAsync("playSound", "send");
+            
+            var request = new { prompt = UserInput, conversationId = Guid.NewGuid() };
+            var response = await Http.PostAsJsonAsync("api/Chat", request);
+            var data = await response.Content.ReadFromJsonAsync<ChatResponse>();
+            
+            Messages.Add($"You: {UserInput}");
+            UserInput = string.Empty;
+            
+            // Simple delay to show typing animation
+            await Task.Delay(1500);
+            
+            if (data?.message != null)
+            {
+                Messages.Add($"Bot: {data.message}");
+                // Play receive sound
+                await JS.InvokeVoidAsync("playSound", "receive");
+            }
+            else
+            {
+                Messages.Add($"Bot: Sorry, I couldn't process your request.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Messages.Add($"Error: {ex.Message}");
+            // Play error sound
+            await JS.InvokeVoidAsync("playSound", "error");
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+            
+            // Scroll to bottom after sending message
+            await Task.Delay(100);
+            await JS.InvokeVoidAsync("scrollToBottom");
+        }
     }
 
     public class ChatResponse
