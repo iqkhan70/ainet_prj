@@ -35,3 +35,4 @@ packages/
 
 # macOS junk
 .DS_Store
+appsettings.json
