@@ -181,6 +181,102 @@ html, body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* PII Warning Styles */
+.pii-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    color: #856404;
+    animation: slideInUp 0.3s ease-out;
+}
+
+.warning-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+}
+
+.warning-content {
+    flex: 1;
+    line-height: 1.5;
+}
+
+.warning-content strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: #856404;
+}
+
+.pii-details {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: #856404;
+    background-color: rgba(255, 255, 255, 0.5);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Dot Animation Styles for Typing Indicator */
+.dot-container {
+    position: relative;
+    width: 8px;
+    height: 8px;
+}
+
+.dot-base {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: #d1d5db;
+    border-radius: 50%;
+    opacity: 0.3;
+}
+
+.dot-overlay {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: #6b7280;
+    border-radius: 50%;
+    animation: dotPulse 1.4s ease-in-out infinite both;
+}
+
+.dot-overlay:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.dot-overlay:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes dotPulse {
+    0%, 80%, 100% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
 .chat-input {
     flex: 1;
     border: none;
