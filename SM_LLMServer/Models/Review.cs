@@ -32,6 +32,10 @@ namespace SM_LLMServer.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        
+        public DateTime ExpiresAt { get; set; } = DateTime.UtcNow.AddDays(7);
+        
+        public DateTime GeneratedAt { get; set; } = DateTime.UtcNow;
     }
 
     public class ReviewRequest
