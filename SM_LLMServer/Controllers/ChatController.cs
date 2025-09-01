@@ -17,18 +17,32 @@ public class ChatController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post(ChatRequest request)
+    public async Task<IActionResult> Post(ChatRequest request, [FromQuery] string provider = "OpenAI")
     {
         if (string.IsNullOrWhiteSpace(request.Prompt))
             return BadRequest(new { error = "Prompt is required" });
 
-        var reply = await _chatService.SendMessageAsync(request.Prompt, request.ConversationId);
-        return Ok(new { message = reply });
+        // Parse provider from query parameter
+        var aiProvider = ParseProvider(provider);
+
+        var reply = await _chatService.SendMessageAsync(request.Prompt, request.ConversationId, aiProvider);
+        return Ok(new { message = reply.Message, provider = reply.Provider });
     }
 
     [HttpGet]
     public IActionResult Get()
     {
-        return Ok(new { message = "Chat API is alive. Use POST to send prompts." });
+        return Ok(new { message = "Chat API is alive. Use POST to send prompts. Available providers: OpenAI, Ollama, CustomKnowledge" });
+    }
+
+    private AiProvider ParseProvider(string provider)
+    {
+        return provider.ToLower() switch
+        {
+            "ollama" => AiProvider.Ollama,
+            "customknowledge" => AiProvider.CustomKnowledge,
+            "huggingface" => AiProvider.HuggingFace,
+            _ => AiProvider.OpenAI
+        };
     }
 }

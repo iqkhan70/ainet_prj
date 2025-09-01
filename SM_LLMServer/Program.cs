@@ -8,20 +8,17 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add CORS to allow Blazor client requests
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowBlazorClient", policy =>
-    {
-        policy.WithOrigins("http://localhost:7010", "https://localhost:7011")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
+builder.Services.AddCors();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Register services
 builder.Services.AddScoped<ChatService>();
+builder.Services.AddScoped<ConversationRepository>();
+builder.Services.AddScoped<LlmClient>(provider => 
+    new LlmClient(builder.Configuration));
 
 var app = builder.Build();
 
@@ -33,8 +30,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Enable CORS
-app.UseCors("AllowBlazorClient");
+// Enable CORS with simple policy
+app.UseCors(policy => policy
+    .AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader());
 
 app.UseAuthorization();
 app.MapControllers();
