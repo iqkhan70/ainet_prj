@@ -5,6 +5,11 @@
 @inject IJSRuntime JS
 
 <div class="chat-container">
+    <div class="nav-links">
+        <a href="/chat" class="nav-link active">Chat</a>
+        <a href="/reviews" class="nav-link">Reviews</a>
+    </div>
+    
     <div class="chat-messages" id="chatMessages">
         @foreach (var message in Messages)
         {

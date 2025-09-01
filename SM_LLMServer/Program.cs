@@ -20,6 +20,10 @@ builder.Services.AddScoped<ConversationRepository>();
 builder.Services.AddScoped<LlmClient>(provider => 
     new LlmClient(builder.Configuration));
 
+// Register review services
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
