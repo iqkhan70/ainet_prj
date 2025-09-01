@@ -1,4 +1,4 @@
-@page "/chat"
+@page "/regularchat"
 @using System.Net.Http.Json
 @using Microsoft.JSInterop
 @inject HttpClient Http
@@ -6,13 +6,22 @@
 
 <div class="chat-container">
     <div class="nav-links">
-        <a href="/chat" class="nav-link active">WonderWorld Chat</a>
-        <a href="/regularchat" class="nav-link">Regular Chat</a>
+        <a href="/chat" class="nav-link">WonderWorld Chat</a>
+        <a href="/regularchat" class="nav-link active">Regular Chat</a>
         <a href="/piichat" class="nav-link">PII Chat</a>
         <a href="/reviews" class="nav-link">Reviews</a>
     </div>
     
     <div class="chat-messages" id="chatMessages">
+        @if (!Messages.Any())
+        {
+            <div class="welcome-message">
+                <div class="welcome-icon">🤖</div>
+                <h1>How can I help you today?</h1>
+                <p>I'm an AI assistant ready to help with any questions you might have.</p>
+            </div>
+        }
+        
         @foreach (var message in Messages)
         {
             @if (message.StartsWith("You:"))
@@ -31,16 +40,6 @@
                     <div class="message bot-message">
                         <div class="message-content">
                             @message.Substring(4)
-                        </div>
-                    </div>
-                </div>
-            }
-            else
-            {
-                <div class="message-container system-container">
-                    <div class="message system-message">
-                        <div class="message-content">
-                            @message
                         </div>
                     </div>
                 </div>
@@ -71,13 +70,14 @@
             </div>
         }
     </div>
+    
     <div class="chat-input-container">
         <div class="input-wrapper">
             <input 
                 @bind="UserInput" 
                 @bind:event="oninput" 
                 @onkeydown="HandleKeyDown" 
-                placeholder="Ask me about WonderWorld theme park..." 
+                placeholder="Message..." 
                 class="chat-input" 
                 disabled="@IsLoading"
             />
@@ -93,6 +93,10 @@
                     </svg>
                 }
             </button>
+        </div>
+        
+        <div class="input-footer">
+            <small>Regular Chat - No specialized knowledge, general AI assistance</small>
         </div>
     </div>
 </div>
@@ -123,7 +127,7 @@
             await JS.InvokeVoidAsync("playSound", "send");
             
             var request = new { prompt = UserInput, conversationId = Guid.NewGuid() };
-            var response = await Http.PostAsJsonAsync("api/Chat", request);
+            var response = await Http.PostAsJsonAsync("api/Chat/regular", request);
             var data = await response.Content.ReadFromJsonAsync<ChatResponse>();
             
             Messages.Add($"You: {UserInput}");
@@ -163,22 +167,5 @@
     public class ChatResponse
     {
         public string message { get; set; } = string.Empty;
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        // Call GET /api/chat when the page first loads
-        try
-        {
-            var data = await Http.GetFromJsonAsync<ChatResponse>("api/Chat");
-            if (data != null && !string.IsNullOrEmpty(data.message))
-            {
-                Messages.Add($"Bot: {data.message}");
-            }
-        }
-        catch (Exception ex)
-        {
-            Messages.Add($"Error: {ex.Message}");
-        }
     }
 }

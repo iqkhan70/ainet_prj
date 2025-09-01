@@ -2,6 +2,13 @@
 
 Test the PII Chat functionality with these examples. Copy and paste any of these into the PII Chat input field to see the detection in action.
 
+## 🎯 **Chat Types Available:**
+
+- **WonderWorld Chat**: Specialized chat with theme park knowledge and custom prompts
+- **Regular Chat**: Standard ChatGPT-style interface for general questions
+- **PII Chat**: Secure chat with PII detection and blocking
+- **Reviews**: Product reviews and AI-generated summaries
+
 ## 🚫 **PII Examples (Will Be Blocked):**
 
 ### **Social Security Number (SSN):**
@@ -90,15 +97,32 @@ Test the PII Chat functionality with these examples. Copy and paste any of these
    - Message sends normally
    - AI responds as usual
 
-## 🎯 **Navigation:**
+## 🎭 **Demonstrating the Differences:**
 
-- **Chat**: Regular chat without PII protection
-- **PII Chat**: Chat with PII detection and blocking
-- **Reviews**: Product reviews and summaries
+### **WonderWorld Chat:**
+- Specialized for theme park questions
+- Custom knowledge base integration
+- Placeholder: "Ask me about WonderWorld theme park..."
+- **API Endpoint**: `/api/Chat` (with WonderWorld prompts)
+
+### **Regular Chat:**
+- General AI assistance
+- ChatGPT-style interface
+- Welcome message with robot icon
+- Placeholder: "Message..."
+- **API Endpoint**: `/api/Chat/regular` (general AI prompts)
+- **No WonderWorld knowledge** - answers general questions normally
+
+### **PII Chat:**
+- Same as Regular Chat but with PII protection
+- Blocks sensitive information
+- Shows warning when PII detected
+- **API Endpoint**: `/api/Chat/regular` (same as Regular Chat)
 
 ## 💡 **Tips:**
 
 - The detection is real-time and happens as you type
 - Multiple PII types can be detected in a single message
 - The system is designed to be conservative (better safe than sorry)
-- Your original chat functionality remains completely unchanged
+- Each chat type serves a different purpose
+- Navigation is consistent across all pages

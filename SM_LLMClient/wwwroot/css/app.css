@@ -796,3 +796,44 @@ html, body {
         font-size: 16px; /* Prevents zoom on iOS */
     }
 }
+
+/* Welcome Message Styles */
+.welcome-message {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #6b7280;
+}
+
+.welcome-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.welcome-message h1 {
+    font-size: 1.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.welcome-message p {
+    font-size: 1.125rem;
+    color: #6b7280;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Input Footer Styles */
+.input-footer {
+    text-align: center;
+    margin-top: 0.75rem;
+    color: #9ca3af;
+    font-size: 0.875rem;
+}
+
+.input-footer small {
+    background-color: rgba(156, 163, 175, 0.1);
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    display: inline-block;
+}

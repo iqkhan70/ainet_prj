@@ -23,12 +23,18 @@ namespace SM_LLMServer.Services
             _llmClient = llmClient;
         }
 
-        public async Task<ChatResponse> SendMessageAsync(string prompt, Guid conversationId, AiProvider provider = AiProvider.OpenAI)
+        public async Task<ChatResponse> SendMessageAsync(string prompt, string conversationId, AiProvider provider)
         {
             try
             {
+                // Parse conversationId to Guid
+                if (!Guid.TryParse(conversationId, out Guid guidConversationId))
+                {
+                    guidConversationId = Guid.NewGuid();
+                }
+
                 // Retrieve last response id if any
-                var previousResponseId = _conversationRepository.GetLastResponseId(conversationId);
+                var previousResponseId = _conversationRepository.GetLastResponseId(guidConversationId);
 
                 // Get instructions (lazy loading)
                 var instructions = GetInstructions();
@@ -49,7 +55,60 @@ namespace SM_LLMServer.Services
                 var response = await _llmClient.GenerateTextAsync(llmRequest);
 
                 // Save last response id in conversation repository
-                _conversationRepository.SetLastResponseId(conversationId, response.Id);
+                _conversationRepository.SetLastResponseId(guidConversationId, response.Id);
+
+                return new ChatResponse
+                {
+                    Id = response.Id,
+                    Message = response.Text,
+                    Provider = response.Provider
+                };
+            }
+            catch (Exception ex)
+            {
+                // Return a friendly error message instead of crashing
+                return new ChatResponse
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Message = $"I'm having trouble processing your request right now. Please try again later. (Error: {ex.Message})",
+                    Provider = provider.ToString()
+                };
+            }
+        }
+
+        public async Task<ChatResponse> SendRegularMessageAsync(string prompt, string conversationId, AiProvider provider)
+        {
+            try
+            {
+                // Parse conversationId to Guid
+                if (!Guid.TryParse(conversationId, out Guid guidConversationId))
+                {
+                    guidConversationId = Guid.NewGuid();
+                }
+
+                // Retrieve last response id if any
+                var previousResponseId = _conversationRepository.GetLastResponseId(guidConversationId);
+
+                // Use general AI instructions instead of WonderWorld-specific ones
+                var instructions = "You are a helpful AI assistant. Please provide a helpful and informative response to the user's question. Be conversational and engaging.";
+
+                // Create LLM request with selected provider
+                var llmRequest = new LlmRequest
+                {
+                    Model = GetModelForProvider(provider),
+                    Instructions = instructions,
+                    Prompt = prompt,
+                    Temperature = 0.7,
+                    MaxTokens = 500,
+                    PreviousResponseId = previousResponseId,
+                    Provider = provider
+                };
+
+                // Get response from selected AI provider
+                var response = await _llmClient.GenerateTextAsync(llmRequest);
+
+                // Save last response id in conversation repository
+                _conversationRepository.SetLastResponseId(guidConversationId, response.Id);
 
                 return new ChatResponse
                 {
