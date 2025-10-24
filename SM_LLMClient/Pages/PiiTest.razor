@@ -1,0 +1,241 @@
+@page "/piitest"
+@using SM_LLMClient.Services
+@inject EnhancedPiiDetector PiiDetector
+
+<div class="pii-test-container">
+    <h2>Enhanced PII Detection Test</h2>
+    <p>Test the improved PII detection with various international formats</p>
+
+    <div class="test-section">
+        <h3>Test Input</h3>
+        <textarea @bind="TestInput" @oninput="TestPiiDetection" placeholder="Enter text with potential PII..."
+            class="test-input"></textarea>
+
+        @if (LastResult != null)
+        {
+            <div class="result-section">
+                <h4>Detection Results:</h4>
+                @if (LastResult.HasPii)
+                {
+                    <div class="pii-detected">
+                        <h5>🚨 PII Detected!</h5>
+                        <ul>
+                            @foreach (var type in LastResult.DetectedTypes)
+                            {
+                                <li>
+                                    <strong>@type</strong>
+                                    @if (LastResult.ConfidenceScores.ContainsKey(type))
+                                    {
+                                        <span class="confidence">(@LastResult.ConfidenceScores[type]:P1 confidence)</span>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <div class="no-pii">
+                        <h5>✅ No PII Detected</h5>
+                        <p>This text appears to be safe to send.</p>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="test-examples">
+        <h3>Test Examples</h3>
+        <div class="example-grid">
+            <div class="example-category">
+                <h4>Phone Numbers</h4>
+                <button @onclick="@(() => TestExample("9132723487"))">US: 9132723487</button>
+                <button @onclick="@(() => TestExample("50670123456"))">Costa Rica: 50670123456</button>
+                <button @onclick="@(() => TestExample("+44 20 7946 0958"))">UK: +44 20 7946 0958</button>
+                <button @onclick="@(() => TestExample("+49 30 12345678"))">Germany: +49 30 12345678</button>
+            </div>
+
+            <div class="example-category">
+                <h4>Addresses</h4>
+                <button @onclick="@(() => TestExample("123 Main Street, New York, NY 10001"))">US Address</button>
+                <button @onclick="@(() => TestExample("10 Downing Street, London SW1A 2AA"))">UK Address</button>
+                <button @onclick="@(() => TestExample("Unter den Linden 1, 10117 Berlin"))">German Address</button>
+                <button @onclick="@(() => TestExample("123 Rue de la Paix, 75001 Paris"))">French Address</button>
+            </div>
+
+            <div class="example-category">
+                <h4>Other PII</h4>
+                <button @onclick="@(() => TestExample("john.doe@example.com"))">Email</button>
+                <button @onclick="@(() => TestExample("123-45-6789"))">SSN</button>
+                <button @onclick="@(() => TestExample("4532 1234 5678 9012"))">Credit Card</button>
+                <button @onclick="@(() => TestExample("12/25/1990"))">Date of Birth</button>
+            </div>
+
+            <div class="example-category">
+                <h4>Indian Addresses</h4>
+                <button
+                    @onclick="@(() => TestExample("Flat No. 304, Block B, Green Valley Apartments 12 MG Road, Indiranagar Bengaluru, Karnataka – 560038 India"))">Indian
+                    Address</button>
+                <button @onclick="@(() => TestExample("House No. 123, Sector 15, Gurgaon, Haryana - 122001"))">Indian
+                    Address 2</button>
+            </div>
+
+            <div class="example-category">
+                <h4>Safe Text</h4>
+                <button @onclick="@(() => TestExample("Hello, how are you today?"))">Safe Text</button>
+                <button @onclick="@(() => TestExample("The weather is nice today."))">Safe Text</button>
+                <button @onclick="@(() => TestExample("I love programming!"))">Safe Text</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string TestInput = "";
+    private PiiDetectionResult? LastResult;
+
+    private void TestPiiDetection()
+    {
+        if (!string.IsNullOrWhiteSpace(TestInput))
+        {
+            LastResult = PiiDetector.DetectPii(TestInput);
+        }
+    }
+
+    private void TestExample(string example)
+    {
+        TestInput = example;
+        TestPiiDetection();
+    }
+}
+
+<style>
+    .pii-test-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .test-section {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    .test-input {
+        width: 100%;
+        height: 120px;
+        padding: 15px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+        resize: vertical;
+        font-family: inherit;
+    }
+
+    .test-input:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+
+    .result-section {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    .pii-detected {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+
+    .no-pii {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+
+    .confidence {
+        font-size: 0.9em;
+        color: #666;
+        font-style: italic;
+    }
+
+    .test-examples {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .example-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 15px;
+    }
+
+    .example-category {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    .example-category h4 {
+        margin: 0 0 10px 0;
+        color: #333;
+        font-size: 16px;
+    }
+
+    .example-category button {
+        display: block;
+        width: 100%;
+        margin: 5px 0;
+        padding: 8px 12px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background 0.3s ease;
+    }
+
+    .example-category button:hover {
+        background: #0056b3;
+    }
+
+    h2 {
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    h3 {
+        color: #555;
+        margin-bottom: 15px;
+    }
+
+    h4 {
+        color: #666;
+        margin-bottom: 10px;
+    }
+
+    h5 {
+        margin: 0 0 10px 0;
+        font-size: 16px;
+    }
+
+    ul {
+        margin: 10px 0;
+        padding-left: 20px;
+    }
+
+    li {
+        margin: 5px 0;
+    }
+</style>
